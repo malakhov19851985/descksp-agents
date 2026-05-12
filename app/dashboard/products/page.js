@@ -1,24 +1,41 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabase';
+import { getAuthClient } from '@/lib/supabase';
+
+const MATERIAL_ICONS = { presentation: '📊', factsheet: '📄', video: '🎥', other: '📎' };
+const MATERIAL_LABELS = { presentation: 'Презентация', factsheet: 'Факт-шит', video: 'Видео', other: 'Материал' };
 
 export default function ProductsPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [materials, setMaterials] = useState([]);
+  const [copied, setCopied] = useState(null);
 
   useEffect(() => { loadProducts(); }, []);
 
   async function loadProducts() {
-    const { data } = await supabase
+    const { data } = await getAuthClient()
       .from('agent_products')
       .select('*')
       .eq('status', 'active')
       .order('published_at', { ascending: false });
     setProducts(data || []);
     setLoading(false);
+  }
+
+  async function openProduct(product) {
+    setSelectedProduct(product);
+    const { data } = await getAuthClient().from('agent_product_materials').select('*').eq('product_id', product.id).order('sort_order');
+    setMaterials(data || []);
+  }
+
+  async function copyLink(url, id) {
+    await navigator.clipboard.writeText(url);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
   }
 
   const productTypes = [{ value: 'all', label: 'Все продукты' }, ...
@@ -62,7 +79,7 @@ export default function ProductsPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: '20px' }}>
           {filteredProducts.map(product => (
-            <div key={product.id} className="card" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => setSelectedProduct(product)}>
+            <div key={product.id} className="card" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => openProduct(product)}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <span style={{ padding: '4px 12px', background: getTypeColor(product.product_type), borderRadius: '20px', fontSize: '12px', fontWeight: '600' }}>
                   {product.product_type}
@@ -183,6 +200,39 @@ export default function ProductsPage() {
               <div style={{ marginBottom: '24px' }}>
                 <div style={{ fontSize: '14px', color: 'var(--text-muted)', marginBottom: '8px' }}>О продукте</div>
                 <p style={{ fontSize: '14px', lineHeight: '1.6', color: 'var(--text-secondary)' }}>{selectedProduct.description}</p>
+              </div>
+            )}
+
+            {/* Материалы */}
+            {materials.length > 0 && (
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>📎 Материалы для клиента</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {materials.map(mat => (
+                    <div key={mat.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'var(--bg-secondary)', borderRadius: '10px' }}>
+                      <span style={{ fontSize: '22px' }}>{MATERIAL_ICONS[mat.material_type] || '📎'}</span>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '14px', fontWeight: '500' }}>{mat.title}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{MATERIAL_LABELS[mat.material_type]}</div>
+                      </div>
+                      <a href={mat.file_url} target="_blank" rel="noreferrer" style={{
+                        padding: '6px 12px', borderRadius: '6px', fontSize: '13px',
+                        background: 'var(--bg-card)', color: 'var(--text-secondary)',
+                        textDecoration: 'none', border: '1px solid var(--border-color)'
+                      }}>
+                        Открыть
+                      </a>
+                      <button onClick={() => copyLink(mat.file_url, mat.id)} style={{
+                        padding: '6px 12px', borderRadius: '6px', fontSize: '13px', cursor: 'pointer',
+                        background: copied === mat.id ? 'rgba(34,197,94,0.15)' : 'var(--accent-gradient)',
+                        color: copied === mat.id ? 'var(--success)' : 'white',
+                        border: 'none', transition: 'all 0.2s', whiteSpace: 'nowrap'
+                      }}>
+                        {copied === mat.id ? '✓ Скопировано' : 'Скопировать ссылку'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
