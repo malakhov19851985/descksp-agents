@@ -43,7 +43,8 @@ export async function POST(request) {
           id: agent.id,
           company_name: agent.company_name,
           contact_name: agent.contact_name,
-          email: agent.contact_email
+          email: agent.contact_email,
+          portal_role: agent.portal_role || 'agent'
         }
       });
     }
@@ -72,7 +73,8 @@ export async function POST(request) {
           id: agent.id,
           company_name: agent.company_name,
           contact_name: agent.contact_name,
-          email: agent.contact_email
+          email: agent.contact_email,
+          portal_role: agent.portal_role || 'agent'
         }
       });
     }

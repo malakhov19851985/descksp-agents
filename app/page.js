@@ -15,7 +15,7 @@ export default function HomePage() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span style={{ fontSize: '24px', fontWeight: '700', color: 'var(--accent-blue)' }}>N1</span>
-          <span style={{ fontSize: '24px', fontWeight: '300', color: 'var(--text-primary)' }}>CAPITAL</span>
+          <span style={{ fontSize: '24px', fontWeight: '300', color: 'var(--text-primary)' }}>PRODUCTS</span>
         </div>
         
         <nav style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
@@ -46,7 +46,7 @@ export default function HomePage() {
             marginBottom: '24px'
           }}>
             Партнёрская программа<br />
-            <span className="gradient-text">N1 Capital</span>
+            <span className="gradient-text">N1 Products</span>
           </h1>
           <p style={{
             fontSize: '18px',
@@ -223,10 +223,10 @@ export default function HomePage() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '20px', fontWeight: '700', color: 'var(--accent-blue)' }}>N1</span>
-            <span style={{ fontSize: '20px', fontWeight: '300' }}>CAPITAL</span>
+            <span style={{ fontSize: '20px', fontWeight: '300' }}>PRODUCTS</span>
           </div>
           <div style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-            © 2024 N1 Capital. Все права защищены.
+            © 2026 N1 Products. Все права защищены.
           </div>
         </div>
       </footer>

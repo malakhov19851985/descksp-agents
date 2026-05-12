@@ -27,6 +27,7 @@ export default function LoginPage() {
 
       if (data.success) {
         localStorage.setItem('agent_token', data.token);
+        localStorage.setItem('agent_data', JSON.stringify(data.agent));
         router.push('/dashboard');
       } else {
         setError(data.error || 'Ошибка входа');
