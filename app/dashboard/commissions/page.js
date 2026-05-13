@@ -14,7 +14,7 @@ export default function CommissionsPage() {
 
       const client = getAuthClient();
       const [salesRes, ratesRes] = await Promise.all([
-        client.from('sales').select('id, sale_date, product_name, sisin, amount, currency').eq('agent_id', agentData.id).order('sale_date', { ascending: false }),
+        client.from('sales').select('id, sale_date, product_name, sisin, amount, currency').eq('agent_id', agentData.id).order('sale_date', { ascending: false }).limit(500),
         client.from('agent_commissions').select('sisin, commission_rate').eq('agent_id', agentData.id),
       ]);
 

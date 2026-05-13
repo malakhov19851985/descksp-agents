@@ -13,7 +13,7 @@ export default function SalesPage() {
       const client = getAuthClient();
       const { data } = await client
         .from('sales')
-        .select('id, sale_date, client_name, product_name, amount, currency, commission_pct, commission_usd')
+        .select('id, sale_date, client_name, product_name, amount, currency')
         .eq('agent_id', agentData.id)
         .order('sale_date', { ascending: false });
       setSales(data || []);
@@ -40,7 +40,7 @@ export default function SalesPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bg-secondary)' }}>
-                {['Дата', 'Клиент', 'Продукт', 'Сумма', 'Ставка', 'Комиссия'].map(h => (
+                {['Дата', 'Клиент', 'Продукт', 'Сумма'].map(h => (
                   <th key={h} style={{ padding: '16px', textAlign: 'left', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>{h}</th>
                 ))}
               </tr>
@@ -53,12 +53,6 @@ export default function SalesPage() {
                   <td style={{ padding: '16px', fontSize: '14px' }}>{sale.product_name}</td>
                   <td style={{ padding: '16px', fontSize: '14px', fontWeight: '600' }}>
                     {Number(sale.amount).toLocaleString()} {sale.currency}
-                  </td>
-                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                    {sale.commission_pct}%
-                  </td>
-                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--success)', fontWeight: '600' }}>
-                    ${Number(sale.commission_usd).toLocaleString()}
                   </td>
                 </tr>
               ))}
