@@ -32,8 +32,8 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Аккаунт агента не найден' }, { status: 403 });
       }
 
-      if (agent.status !== 'active') {
-        return NextResponse.json({ error: 'Аккаунт заблокирован' }, { status: 403 });
+      if (agent.status === 'blocked' || agent.status === 'rejected') {
+        return NextResponse.json({ error: 'Аккаунт заблокирован или отклонён' }, { status: 403 });
       }
 
       return NextResponse.json({
@@ -41,10 +41,12 @@ export async function POST(request) {
         token: data.session.access_token,
         agent: {
           id: agent.id,
+          full_name: agent.full_name,
           company_name: agent.company_name,
           contact_name: agent.contact_name,
           email: agent.contact_email,
-          portal_role: agent.portal_role || 'agent'
+          portal_role: agent.portal_role || 'agent',
+          status: agent.status,
         }
       });
     }
@@ -71,10 +73,12 @@ export async function POST(request) {
         success: true,
         agent: {
           id: agent.id,
+          full_name: agent.full_name,
           company_name: agent.company_name,
           contact_name: agent.contact_name,
           email: agent.contact_email,
-          portal_role: agent.portal_role || 'agent'
+          portal_role: agent.portal_role || 'agent',
+          status: agent.status,
         }
       });
     }

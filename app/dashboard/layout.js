@@ -13,6 +13,8 @@ const agentMenu = [
 
 const managerMenu = [
   { id: 'manage-products', label: 'Управление продуктами', icon: '⚙️', href: '/admin/products' },
+  { id: 'manage-agents', label: 'Агенты', icon: '👥', href: '/admin/agents' },
+  { id: 'manage-sales', label: 'Продажи', icon: '📋', href: '/admin/sales' },
 ];
 
 export default function DashboardLayout({ children }) {
@@ -55,6 +57,46 @@ export default function DashboardLayout({ children }) {
         color: 'var(--text-secondary)'
       }}>
         Загрузка...
+      </div>
+    );
+  }
+
+  if (agent?.status === 'pending') {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'var(--bg-primary)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '24px',
+        padding: '40px'
+      }}>
+        <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '48px', textAlign: 'center' }}>
+          <div style={{ fontSize: '64px', marginBottom: '24px' }}>⏳</div>
+          <h1 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '12px' }}>
+            Заявка на рассмотрении
+          </h1>
+          <p style={{ color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: '32px' }}>
+            Ваш аккаунт создан. Менеджер проверит данные и активирует доступ к кабинету.
+            Обычно это занимает 1–2 рабочих дня. После активации войдите заново.
+          </p>
+          <button
+            onClick={handleLogout}
+            style={{
+              background: 'transparent',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px',
+              padding: '10px 24px',
+              color: 'var(--text-secondary)',
+              fontSize: '14px',
+              cursor: 'pointer'
+            }}
+          >
+            Выйти
+          </button>
+        </div>
       </div>
     );
   }

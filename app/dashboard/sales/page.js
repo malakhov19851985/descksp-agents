@@ -1,73 +1,64 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getAuthClient } from '@/lib/supabase';
 
 export default function SalesPage() {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data
-    setTimeout(() => {
-      setSales([
-        { id: 1, date: '2024-12-15', client: 'Иванов И.И.', product: 'AUTOCALL Tech Giants', amount: 50000, currency: 'USD', status: 'Active', commission: 250 },
-        { id: 2, date: '2024-12-10', client: 'Петров П.П.', product: 'FIXRATE Note 8%', amount: 100000, currency: 'USD', status: 'Active', commission: 500 },
-        { id: 3, date: '2024-11-20', client: 'Сидоров С.С.', product: 'AUTOCALL Banks', amount: 75000, currency: 'USD', status: 'Active', commission: 375 },
-      ]);
+    async function load() {
+      const agentData = JSON.parse(localStorage.getItem('agent_data') || '{}');
+      const client = getAuthClient();
+      const { data } = await client
+        .from('sales')
+        .select('id, sale_date, client_name, product_name, amount, currency, commission_pct, commission_usd')
+        .eq('agent_id', agentData.id)
+        .order('sale_date', { ascending: false });
+      setSales(data || []);
       setLoading(false);
-    }, 500);
+    }
+    load();
   }, []);
 
   return (
     <div>
       <div style={{ marginBottom: '32px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '600', marginBottom: '8px' }}>
-          💼 Мои продажи
-        </h1>
-        <p style={{ color: 'var(--text-secondary)' }}>
-          История ваших сделок
-        </p>
+        <h1 style={{ fontSize: '28px', fontWeight: '600', marginBottom: '8px' }}>💼 Мои продажи</h1>
+        <p style={{ color: 'var(--text-secondary)' }}>История ваших сделок</p>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>
-          Загрузка...
+        <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>Загрузка...</div>
+      ) : sales.length === 0 ? (
+        <div className="card" style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+          Сделок пока нет
         </div>
       ) : (
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--bg-secondary)' }}>
-                <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>Дата</th>
-                <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>Клиент</th>
-                <th style={{ padding: '16px', textAlign: 'left', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>Продукт</th>
-                <th style={{ padding: '16px', textAlign: 'right', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>Сумма</th>
-                <th style={{ padding: '16px', textAlign: 'center', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>Статус</th>
-                <th style={{ padding: '16px', textAlign: 'right', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>Комиссия</th>
+                {['Дата', 'Клиент', 'Продукт', 'Сумма', 'Ставка', 'Комиссия'].map(h => (
+                  <th key={h} style={{ padding: '16px', textAlign: 'left', fontSize: '14px', color: 'var(--text-muted)', fontWeight: '500' }}>{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {sales.map(sale => (
                 <tr key={sale.id} style={{ borderTop: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '16px', fontSize: '14px' }}>{sale.date}</td>
-                  <td style={{ padding: '16px', fontSize: '14px' }}>{sale.client}</td>
-                  <td style={{ padding: '16px', fontSize: '14px' }}>{sale.product}</td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'right', fontWeight: '600' }}>
-                    ${sale.amount.toLocaleString()}
+                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--text-muted)' }}>{sale.sale_date}</td>
+                  <td style={{ padding: '16px', fontSize: '14px' }}>{sale.client_name}</td>
+                  <td style={{ padding: '16px', fontSize: '14px' }}>{sale.product_name}</td>
+                  <td style={{ padding: '16px', fontSize: '14px', fontWeight: '600' }}>
+                    {Number(sale.amount).toLocaleString()} {sale.currency}
                   </td>
-                  <td style={{ padding: '16px', textAlign: 'center' }}>
-                    <span style={{
-                      padding: '4px 12px',
-                      borderRadius: '20px',
-                      fontSize: '12px',
-                      background: 'rgba(34, 197, 94, 0.1)',
-                      color: 'var(--success)'
-                    }}>
-                      {sale.status}
-                    </span>
+                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                    {sale.commission_pct}%
                   </td>
-                  <td style={{ padding: '16px', fontSize: '14px', textAlign: 'right', color: 'var(--success)', fontWeight: '600' }}>
-                    ${sale.commission}
+                  <td style={{ padding: '16px', fontSize: '14px', color: 'var(--success)', fontWeight: '600' }}>
+                    ${Number(sale.commission_usd).toLocaleString()}
                   </td>
                 </tr>
               ))}

@@ -1,8 +1,33 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 
 export default function HomePage() {
+  const [form, setForm] = useState({ name: '', phone: '', email: '' });
+  const [formState, setFormState] = useState('idle'); // idle | loading | success | error
+  const [errorMsg, setErrorMsg] = useState('');
+
+  async function handleLeadSubmit(e) {
+    e.preventDefault();
+    setFormState('loading');
+    setErrorMsg('');
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ошибка');
+      setFormState('success');
+      setForm({ name: '', phone: '', email: '' });
+    } catch (err) {
+      setErrorMsg(err.message);
+      setFormState('error');
+    }
+  }
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
       {/* Header */}
@@ -17,11 +42,11 @@ export default function HomePage() {
           <span style={{ fontSize: '24px', fontWeight: '700', color: 'var(--accent-blue)' }}>N1</span>
           <span style={{ fontSize: '24px', fontWeight: '300', color: 'var(--text-primary)' }}>PRODUCTS</span>
         </div>
-        
+
         <nav style={{ display: 'flex', gap: '40px', alignItems: 'center' }}>
           <a href="#products" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Продукты</a>
           <a href="#how" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Как это работает</a>
-          <a href="#faq" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>FAQ</a>
+          <a href="#become-agent" style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>Стать агентом</a>
           <Link href="/login" className="btn-primary" style={{ padding: '10px 20px' }}>
             Войти
           </Link>
@@ -54,19 +79,19 @@ export default function HomePage() {
             lineHeight: '1.6',
             marginBottom: '40px'
           }}>
-            Зарабатывайте с каждой сделки. Готовые инвестиционные продукты 
+            Зарабатывайте с каждой сделки. Готовые инвестиционные продукты
             с доходностью до 18% годовых. Прозрачные комиссии и поддержка на каждом этапе.
           </p>
           <div style={{ display: 'flex', gap: '16px' }}>
             <Link href="/login" className="btn-primary" style={{ padding: '16px 32px', fontSize: '16px' }}>
               Войти в кабинет
             </Link>
-            <a href="#how" className="btn-secondary" style={{ padding: '16px 32px', fontSize: '16px' }}>
-              Узнать больше
+            <a href="#become-agent" className="btn-secondary" style={{ padding: '16px 32px', fontSize: '16px' }}>
+              Стать агентом
             </a>
           </div>
         </div>
-        
+
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <div style={{
             width: '400px',
@@ -119,15 +144,15 @@ export default function HomePage() {
           <h2 style={{ fontSize: '36px', textAlign: 'center', marginBottom: '60px' }}>
             Как это работает
           </h2>
-          
+
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
             gap: '32px'
           }}>
             {[
-              { num: '01', title: 'Регистрация', desc: 'Получите доступ к личному кабинету' },
-              { num: '02', title: 'Обучение', desc: 'Изучите продукты и материалы' },
+              { num: '01', title: 'Заявка', desc: 'Оставьте заявку — менеджер свяжется с вами' },
+              { num: '02', title: 'Доступ', desc: 'Получите приглашение в личный кабинет' },
               { num: '03', title: 'Продажи', desc: 'Предлагайте продукты клиентам' },
               { num: '04', title: 'Комиссия', desc: 'Получайте вознаграждение' }
             ].map((step, i) => (
@@ -166,7 +191,7 @@ export default function HomePage() {
         <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '60px' }}>
           Полный каталог доступен в личном кабинете
         </p>
-        
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
@@ -200,11 +225,97 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-        
+
         <div style={{ textAlign: 'center', marginTop: '40px' }}>
           <Link href="/login" className="btn-primary" style={{ padding: '16px 40px', fontSize: '16px' }}>
             Смотреть все продукты
           </Link>
+        </div>
+      </section>
+
+      {/* Become Agent */}
+      <section id="become-agent" style={{
+        padding: '80px 60px',
+        background: 'var(--bg-secondary)',
+        marginTop: '40px'
+      }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '36px', textAlign: 'center', marginBottom: '12px' }}>
+            Стать агентом
+          </h2>
+          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', marginBottom: '40px', fontSize: '16px' }}>
+            Оставьте заявку — менеджер свяжется с вами и откроет доступ к кабинету
+          </p>
+
+          {formState === 'success' ? (
+            <div className="card" style={{ padding: '48px', textAlign: 'center' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+              <h3 style={{ fontSize: '20px', marginBottom: '8px' }}>Заявка отправлена</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
+                Мы свяжемся с вами в ближайшее время
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleLeadSubmit} className="card" style={{ padding: '40px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  Ваше имя
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Иван Иванов"
+                  value={form.name}
+                  onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  className="input-field"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  Телефон
+                </label>
+                <input
+                  type="tel"
+                  required
+                  placeholder="+7 700 000 00 00"
+                  value={form.phone}
+                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                  className="input-field"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  Email
+                </label>
+                <input
+                  type="email"
+                  required
+                  placeholder="ivan@example.com"
+                  value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  className="input-field"
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              {formState === 'error' && (
+                <p style={{ color: 'var(--accent-red, #ef4444)', fontSize: '14px', margin: 0 }}>
+                  {errorMsg}
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={formState === 'loading'}
+                style={{ padding: '14px', fontSize: '16px', width: '100%' }}
+              >
+                {formState === 'loading' ? 'Отправляем...' : 'Отправить заявку'}
+              </button>
+            </form>
+          )}
         </div>
       </section>
 
